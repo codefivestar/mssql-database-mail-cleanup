@@ -1,0 +1,1 @@
+# mssql-database-mail-cleanup
