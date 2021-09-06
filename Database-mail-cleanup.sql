@@ -13,7 +13,18 @@ GO
 
 DECLARE @DeleteBeforeDate DATETIME; 
     SET @DeleteBeforeDate = DATEADD(d,-30, GETDATE());
-	
-	EXEC sysmail_delete_mailitems_sp @sent_before   = @DeleteBeforeDate;
-	EXEC sysmail_delete_log_sp       @logged_before = @DeleteBeforeDate;
 
+-- delete from sysmail_attachments
+DELETE FROM [dbo].[sysmail_attachments] WHERE last_mod_date < @DeleteBeforeDate;
+
+-- delete from sysmail_send_retries
+DELETE FROM [dbo].[sysmail_send_retries] WHERE last_send_attempt_date < @DeleteBeforeDate;
+
+-- delete from sysmail_allitems
+EXEC sysmail_delete_mailitems_sp @sent_before   = @DeleteBeforeDate;
+
+-- delete from sysmail_log
+EXEC sysmail_delete_log_sp       @logged_before = @DeleteBeforeDate;
+
+DBCC SHRINKDATABASE(N'msdb')
+DBCC SHRINKFILE (N'MSDBData' , 0, truncateonly)
